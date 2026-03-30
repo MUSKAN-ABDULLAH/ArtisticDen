@@ -49,6 +49,29 @@
       cursor: none;
     }
 
+    /* ===== IMAGE PROTECTION ===== */
+    img {
+      -webkit-user-drag: none;
+      /* Safari/Chrome - keep this one */
+      -webkit-user-select: none;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .portfolio-item {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Transparent theft-prevention overlay on all portfolio images */
+    .img-protect-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      background: transparent;
+      cursor: pointer;
+    }
+
     .cursor {
       position: fixed;
       width: 12px;
@@ -919,6 +942,7 @@
       gap: 3px;
     }
 
+    /* ── DEFAULT: square crop for anime/cover/logos/emotes ── */
     .portfolio-item {
       position: relative;
       aspect-ratio: 1;
@@ -932,6 +956,59 @@
       aspect-ratio: 2/1;
     }
 
+    /* ── FULL-VIEW MODE: for banners, alerts, panels, pixel art ──
+       These categories show the full image without cropping.
+       The grid switches to single-column and items expand to show complete artwork. */
+    .portfolio-grid.full-view {
+      grid-template-columns: 1fr;
+    }
+
+    .portfolio-grid.full-view .portfolio-item {
+      aspect-ratio: unset;
+      height: auto;
+      min-height: 120px;
+    }
+
+    /* For banners (landscape) inside full-view: show full wide image */
+    .portfolio-grid.full-view .portfolio-item img {
+      width: 100%;
+      height: auto;
+      min-height: 80px;
+      max-height: none;
+      object-fit: unset;
+      display: block;
+    }
+
+    /* Keep .wide class working in full-view by resetting it */
+    .portfolio-grid.full-view .portfolio-item.wide {
+      grid-column: span 1;
+      aspect-ratio: unset;
+      height: auto;
+    }
+
+    /* ── PANEL MODE: for panels, emotes, pixel art (portrait/square images in 2-col grid) ── */
+    .portfolio-grid.panel-view {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+
+    .portfolio-grid.panel-view .portfolio-item {
+      aspect-ratio: unset;
+      height: auto;
+    }
+
+    .portfolio-grid.panel-view .portfolio-item img {
+      width: 100%;
+      height: auto;
+      object-fit: unset;
+      display: block;
+    }
+
+    .portfolio-grid.panel-view .portfolio-item.wide {
+      grid-column: span 1;
+      aspect-ratio: unset;
+    }
+
+    /* Default image styles (cover crop for square grid) */
     .portfolio-item video {
       width: 100%;
       height: 100%;
@@ -951,7 +1028,14 @@
 
     .portfolio-item:hover img,
     .portfolio-item:hover video {
-      transform: scale(1.08);
+      transform: scale(1.05);
+      filter: brightness(0.45) saturate(1.2);
+    }
+
+    /* In full-view / panel-view modes, don't scale up since images are already full size */
+    .portfolio-grid.full-view .portfolio-item:hover img,
+    .portfolio-grid.panel-view .portfolio-item:hover img {
+      transform: none;
       filter: brightness(0.45) saturate(1.2);
     }
 
@@ -965,6 +1049,7 @@
       flex-direction: column;
       justify-content: flex-end;
       padding: 24px;
+      z-index: 4;
     }
 
     .portfolio-item:hover .portfolio-overlay {
@@ -1011,15 +1096,14 @@
       color: white;
       padding: 4px 10px;
       clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
-      z-index: 2;
+      z-index: 5;
     }
 
-    /* ===== VID PLACEHOLDER — base styles ===== */
+    /* ===== VID PLACEHOLDER ===== */
     .portfolio-item .vid-placeholder {
       position: absolute;
       inset: 0;
       z-index: 1;
-      /* Rich layered gradient — looks intentional even without a poster image */
       background:
         linear-gradient(135deg, rgba(230, 48, 48, 0.18) 0%, transparent 60%),
         linear-gradient(225deg, rgba(176, 28, 28, 0.12) 0%, transparent 60%),
@@ -1033,11 +1117,9 @@
       align-items: center;
       justify-content: center;
       gap: 12px;
-      /* Subtle animated border glow */
       box-shadow: inset 0 0 40px rgba(230, 48, 48, 0.06);
     }
 
-    /* Poster image loaded — dark overlay so play button stays visible */
     .portfolio-item .vid-placeholder.has-poster::before {
       content: '';
       position: absolute;
@@ -1046,7 +1128,6 @@
       z-index: 0;
     }
 
-    /* Decorative corner lines — makes the dark card look designed */
     .portfolio-item .vid-placeholder::after {
       content: '';
       position: absolute;
@@ -1092,7 +1173,6 @@
       color: rgba(255, 255, 255, 0.4);
     }
 
-    /* Show video name as a subtitle in the placeholder on mobile */
     .portfolio-item .vid-placeholder .vp-title {
       position: relative;
       z-index: 1;
@@ -1104,7 +1184,6 @@
       padding: 0 16px;
       line-height: 1.2;
       display: none;
-      /* shown only on mobile via media query */
     }
 
     .portfolio-item.vid-loaded .vid-placeholder {
@@ -1117,7 +1196,6 @@
         display: none !important;
       }
 
-      /* Always show placeholder on mobile — even for vid-loaded items */
       .portfolio-item .vid-placeholder {
         display: flex !important;
       }
@@ -1126,12 +1204,10 @@
         display: flex !important;
       }
 
-      /* Show the title text in placeholder on mobile */
       .portfolio-item .vid-placeholder .vp-title {
         display: block;
       }
 
-      /* On tap, show overlay */
       .portfolio-item:active .portfolio-overlay {
         opacity: 1 !important;
       }
@@ -1902,6 +1978,15 @@
       .about-card {
         padding: 28px 20px;
       }
+
+      /* Mobile: full-view always single column */
+      .portfolio-grid.full-view {
+        grid-template-columns: 1fr;
+      }
+
+      .portfolio-grid.panel-view {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     @media (max-width: 600px) {
@@ -2019,6 +2104,10 @@
       .float-icon {
         display: none;
       }
+
+      .portfolio-grid.panel-view {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 400px) {
@@ -2132,15 +2221,11 @@
       }
     }
 
-    /* ===== MOBILE PERFORMANCE: kill heavy bg decorations only ===== */
     @media (max-width: 768px) {
-
-      /* Remove expensive blur filter blobs */
       .ink-blob {
         display: none !important;
       }
 
-      /* Remove floating geo shapes & icons */
       .geo-shape {
         display: none !important;
       }
@@ -2161,35 +2246,29 @@
         display: none !important;
       }
 
-      /* Remove SVG fractalNoise filter - repaints every frame */
       body::before {
         display: none !important;
       }
 
-      /* Remove background radial gradients */
       body::after {
         display: none !important;
       }
 
-      /* Remove hero brush blob animation */
       .hero-brush {
         animation: none !important;
         display: none !important;
       }
 
-      /* Remove nav blur - GPU killer on budget Android */
       nav {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         background: rgba(8, 8, 8, 0.98) !important;
       }
 
-      /* Skip intro screen entirely - no 3.5s wait on slow phones */
       #intro-screen {
         display: none !important;
       }
 
-      /* Show hero content immediately */
       .hero-eyebrow,
       .hero-title,
       .hero-desc,
@@ -2199,7 +2278,6 @@
         animation: none !important;
       }
 
-      /* Show reveal elements immediately - skip observer overhead */
       .reveal {
         opacity: 1 !important;
         transform: none !important;
@@ -2216,11 +2294,37 @@
       contain: layout style paint;
     }
 
-    /* Lightbox loading spinner */
     @keyframes lbspin {
       to {
         transform: rotate(360deg);
       }
+    }
+
+    /* ===== RIGHT-CLICK PROTECTION TOAST ===== */
+    .protect-toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(20, 20, 20, 0.96);
+      border: 1px solid var(--accent);
+      color: var(--white);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      padding: 12px 28px;
+      clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      white-space: nowrap;
+    }
+
+    .protect-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
   </style>
 </head>
@@ -2229,6 +2333,9 @@
 
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- Protection toast -->
+  <div class="protect-toast" id="protectToast">🔒 Images are protected — © Artistic Den</div>
 
   <!-- CREATIVE BACKGROUND SYSTEM -->
   <div class="art-bg">
@@ -2429,43 +2536,49 @@
     <div class="portfolio-grid" id="portfolioGrid">
 
       <!-- ANIME ART -->
-      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)"><img src="images/anime_1.jpeg"
-          alt="Dark Hoodie" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/anime_1.jpeg" alt="Dark Hoodie" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Anime Illustration</p>
           <p class="portfolio-name">DARK HOODIE</p><span class="portfolio-tag">Anime Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)"><img src="images/anime_2.jpeg"
-          alt="Twin Tails" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/anime_2.jpeg" alt="Twin Tails" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Anime Illustration</p>
           <p class="portfolio-name">TWIN TAILS</p><span class="portfolio-tag">Anime Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)"><img src="images/anime_3.jpeg"
-          alt="Forest Fairy" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/anime_3.jpeg" alt="Forest Fairy" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Anime Illustration</p>
           <p class="portfolio-name">FOREST FAIRY</p><span class="portfolio-tag">Original Character</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)"><img src="images/anime_4.jpeg"
-          alt="Cosmic Goddess" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/anime_4.jpeg" alt="Cosmic Goddess" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Anime Illustration</p>
           <p class="portfolio-name">COSMIC GODDESS</p><span class="portfolio-tag">Original Character</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)"><img src="images/anime_5.jpeg"
-          alt="The Gentleman" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/anime_5.jpeg" alt="The Gentleman" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Anime Illustration</p>
           <p class="portfolio-name">THE GENTLEMAN</p><span class="portfolio-tag">Original Character</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)"><img src="images/anime_6.jpeg"
-          alt="Golden Angel" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="anime" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/anime_6.jpeg" alt="Golden Angel" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Anime Illustration</p>
           <p class="portfolio-name">GOLDEN ANGEL</p><span class="portfolio-tag">Original Character</span>
@@ -2473,57 +2586,65 @@
       </div>
 
       <!-- COVER ART -->
-      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_1.jpeg"
-          alt="Don Lear" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_1.jpeg" alt="Don Lear" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Cover Art</p>
           <p class="portfolio-name">DON LEAR</p><span class="portfolio-tag">Noir Style</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_2.jpeg"
-          alt="Book Illustration" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_2.jpeg" alt="Book Illustration" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Book Illustration</p>
           <p class="portfolio-name">MIND DWELLING</p><span class="portfolio-tag">Children's Book</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_3.jpeg"
-          alt="The Lore Page" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_3.jpeg" alt="The Lore Page" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Cover Art</p>
           <p class="portfolio-name">THE LORE PAGE</p><span class="portfolio-tag">Dark Fantasy</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_4.jpeg"
-          alt="Ensemble Cast Cave" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_4.jpeg" alt="Ensemble Cast Cave" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Cover Art</p>
           <p class="portfolio-name">ENSEMBLE CAST</p><span class="portfolio-tag">Group Illustration</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_5.jpeg"
-          alt="Character Group Forest" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_5.jpeg" alt="Character Group Forest" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Cover Art</p>
           <p class="portfolio-name">COLORFUL ENSEMBLE</p><span class="portfolio-tag">Group Illustration</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_6.jpeg"
-          alt="Mountain Ensemble" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_6.jpeg" alt="Mountain Ensemble" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Cover Art</p>
           <p class="portfolio-name">MOUNTAIN CAST</p><span class="portfolio-tag">Group Illustration</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_7.jpeg"
-          alt="Contact the Author" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_7.jpeg" alt="Contact the Author" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Cover Art</p>
           <p class="portfolio-name">CONTACT THE AUTHOR</p><span class="portfolio-tag">Book Illustration</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)"><img src="images/cover_8.jpeg"
-          alt="Welcome Website" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="cover" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/cover_8.jpeg" alt="Welcome Website" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Cover Art</p>
           <p class="portfolio-name">WELCOME ILLUSTRATION</p><span class="portfolio-tag">Website Art</span>
@@ -2531,43 +2652,49 @@
       </div>
 
       <!-- LOGOS -->
-      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)"><img src="images/logo_1.webp"
-          alt="Milot Logo" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/logo_1.webp" alt="Milot Logo" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Logo Design</p>
           <p class="portfolio-name">MILOT</p><span class="portfolio-tag">Anime / Esports</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)"><img src="images/logo_2.png"
-          alt="Quercus Rex Logo" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/logo_2.png" alt="Quercus Rex Logo" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Logo Design</p>
           <p class="portfolio-name">QUERCUS REX</p><span class="portfolio-tag">Nature Theme</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)"><img src="images/logo_3.jpg"
-          alt="Glen Cocito Logo" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/logo_3.jpg" alt="Glen Cocito Logo" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Logo Design</p>
           <p class="portfolio-name">GLEN COCITO</p><span class="portfolio-tag">Character Logo</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)"><img src="images/logo_4.png"
-          alt="Stellarc12 Logo" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/logo_4.png" alt="Stellarc12 Logo" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Logo Design</p>
           <p class="portfolio-name">STELLARC12</p><span class="portfolio-tag">Space Theme</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)"><img src="images/logo_5.jpeg"
-          alt="Gobog Logo" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/logo_5.jpeg" alt="Gobog Logo" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Logo Design</p>
           <p class="portfolio-name">GOBOG</p><span class="portfolio-tag">Casino Theme</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)"><img src="images/logo_7.png"
-          alt="Cable6789 Logo" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="logos" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/logo_7.png" alt="Cable6789 Logo" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Logo Design</p>
           <p class="portfolio-name">CABLE6789</p><span class="portfolio-tag">Pirate Theme</span>
@@ -2588,64 +2715,73 @@
       </div>
 
       <!-- BANNERS -->
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_1.png"
-          alt="Quercus Rex Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_1.png" alt="Quercus Rex Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">QUERCUS REX</p><span class="portfolio-tag">Nature Theme</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_2.png"
-          alt="CloezyCozy Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_2.png" alt="CloezyCozy Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">CLOEZYCOZY</p><span class="portfolio-tag">Gaming</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_3.png"
-          alt="TheCurlyRican Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_3.png" alt="TheCurlyRican Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">THECURLYRICAN</p><span class="portfolio-tag">Bold Magenta</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_4.png"
-          alt="Stellarc12 Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_4.png" alt="Stellarc12 Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">STELLARC12</p><span class="portfolio-tag">Space / Cosmic</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_5.png"
-          alt="Engineerd Rat Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_5.png" alt="Engineerd Rat Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">ENGINEERD RAT</p><span class="portfolio-tag">Purple Galaxy</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_6.png"
-          alt="STELLA Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_6.png" alt="STELLA Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">STELLA</p><span class="portfolio-tag">Horror / Dark</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_7.png"
-          alt="Engineerd Rat Space Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_7.png" alt="Engineerd Rat Space Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">ENGINEERD RAT v2</p><span class="portfolio-tag">Space Theme</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_8.webp"
-          alt="Nuove Horror Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_8.webp" alt="Nuove Horror Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">NUOVE v2</p><span class="portfolio-tag">Horror / Dark</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)"><img src="images/banner_9.jpeg"
-          alt="Gobog Casino Banner" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="banners" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/banner_9.jpeg" alt="Gobog Casino Banner" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Channel Banner</p>
           <p class="portfolio-name">GOBOG</p><span class="portfolio-tag">Casino Theme</span>
@@ -2653,29 +2789,33 @@
       </div>
 
       <!-- OVERLAYS -->
-      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)"><img src="images/overlay_1.png"
-          alt="Quercus Rex Overlay" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/overlay_1.png" alt="Quercus Rex Overlay" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Overlay</p>
           <p class="portfolio-name">QUERCUS REX</p><span class="portfolio-tag">Nature / Forest</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)"><img src="images/overlay_2.png"
-          alt="SifRen Overlay" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/overlay_2.png" alt="SifRen Overlay" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Overlay</p>
           <p class="portfolio-name">SIFREN</p><span class="portfolio-tag">Blue Lightning</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)"><img src="images/overlay_5.jpeg"
-          alt="Gobog Overlay" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/overlay_5.jpeg" alt="Gobog Overlay" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Overlay</p>
           <p class="portfolio-name">GOBOG</p><span class="portfolio-tag">Casino / Fire</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)"><img src="images/overlay_6.jpeg"
-          alt="Cute Pink Overlay" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="overlays" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/overlay_6.jpeg" alt="Cute Pink Overlay" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Overlay</p>
           <p class="portfolio-name">MY MELODY</p><span class="portfolio-tag">Cute / Kawaii</span>
@@ -2722,36 +2862,41 @@
       </div>
 
       <!-- ALERTS -->
-      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)"><img src="images/alert_1.png"
-          alt="Raid Alert" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/alert_1.png" alt="Raid Alert" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Alert</p>
           <p class="portfolio-name">RAID ALERT</p><span class="portfolio-tag">Nature Theme</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)"><img src="images/alert_2.png"
-          alt="New Follower Alert" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/alert_2.png" alt="New Follower Alert" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Alert</p>
           <p class="portfolio-name">NEW FOLLOWER</p><span class="portfolio-tag">Purple / Cute</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)"><img src="images/alert_3.png"
-          alt="New Subscriber Alert" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/alert_3.png" alt="New Subscriber Alert" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Alert</p>
           <p class="portfolio-name">NEW SUBSCRIBER</p><span class="portfolio-tag">Blue Lightning</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)"><img src="images/alert_4.jpeg"
-          alt="New Donation Alert" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/alert_4.jpeg" alt="New Donation Alert" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Alert</p>
           <p class="portfolio-name">NEW DONATION</p><span class="portfolio-tag">Purple / Bold</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)"><img src="images/alert_5.png"
-          alt="SifRen Donation Alert" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="alerts" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/alert_5.png" alt="SifRen Donation Alert" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Alert</p>
           <p class="portfolio-name">SIFREN DONATION</p><span class="portfolio-tag">Dark Smoke</span>
@@ -2772,64 +2917,73 @@
       </div>
 
       <!-- PANELS -->
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_1.png"
-          alt="Donation Panel" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_1.png" alt="Donation Panel" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">DONATION</p><span class="portfolio-tag">Twitch Panel</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_2.png"
-          alt="About Me Panel" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_2.png" alt="About Me Panel" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">ABOUT ME</p><span class="portfolio-tag">Nature Theme</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_3.png"
-          alt="Credits Panel" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_3.png" alt="Credits Panel" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">CREDITS</p><span class="portfolio-tag">Dark Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_4.png"
-          alt="Donate Panel" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_4.png" alt="Donate Panel" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">DONATE</p><span class="portfolio-tag">Kawaii Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_5.png"
-          alt="Discord Panel" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_5.png" alt="Discord Panel" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">DISCORD</p><span class="portfolio-tag">Cute Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_6.png"
-          alt="Games Panel" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_6.png" alt="Games Panel" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">GAMES</p><span class="portfolio-tag">Kawaii Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_7.png"
-          alt="Donation Panel Orange" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_7.png" alt="Donation Panel Orange" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">DONATION</p><span class="portfolio-tag">Orange Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_8.png"
-          alt="Credits Panel Purple" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_8.png" alt="Credits Panel Purple" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">CREDITS</p><span class="portfolio-tag">Purple Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)"><img src="images/panel_9.png"
-          alt="Donation Illustration" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="panels" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/panel_9.png" alt="Donation Illustration" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Panel</p>
           <p class="portfolio-name">DONATION PANEL</p><span class="portfolio-tag">Illustrated</span>
@@ -2837,64 +2991,73 @@
       </div>
 
       <!-- EMOTES -->
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_1.png"
-          alt="Cry Emote" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_1.png" alt="Cry Emote" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Emote</p>
           <p class="portfolio-name">CRY</p><span class="portfolio-tag">Chibi Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_2.png"
-          alt="Excited Emote" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_2.png" alt="Excited Emote" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Emote</p>
           <p class="portfolio-name">EXCITED</p><span class="portfolio-tag">Chibi Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_7.jpeg"
-          alt="Love Emote" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_7.jpeg" alt="Love Emote" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Emote</p>
           <p class="portfolio-name">LOVE</p><span class="portfolio-tag">Chibi Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_8.jpeg"
-          alt="Chibi Emote" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_8.jpeg" alt="Chibi Emote" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Emote</p>
           <p class="portfolio-name">CHIBI HUG</p><span class="portfolio-tag">Chibi Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_9.jpeg"
-          alt="RIP Emote" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_9.jpeg" alt="RIP Emote" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Emote</p>
           <p class="portfolio-name">RIP</p><span class="portfolio-tag">Chibi Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_10.jpeg"
-          alt="Sad Emote" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_10.jpeg" alt="Sad Emote" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Emote</p>
           <p class="portfolio-name">SAD</p><span class="portfolio-tag">Dark Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_11.jpeg"
-          alt="Excited Chibi Girl" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_11.jpeg" alt="Excited Chibi Girl" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Emote</p>
           <p class="portfolio-name">EXCITED GIRL</p><span class="portfolio-tag">Chibi Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_3.gif"
-          alt="Animated Emote 1" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_3.gif" alt="Animated Emote 1" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Animated Emote</p>
           <p class="portfolio-name">ANIMATED EMOTE</p><span class="portfolio-tag">GIF Style</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)"><img src="images/emote_4.gif"
-          alt="Animated Emote 2" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="emotes" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/emote_4.gif" alt="Animated Emote 2" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Animated Emote</p>
           <p class="portfolio-name">ANIMATED EMOTE 2</p><span class="portfolio-tag">GIF Style</span>
@@ -2902,71 +3065,81 @@
       </div>
 
       <!-- PIXEL ART -->
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_1.webp"
-          alt="One Beat at a Time" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_1.webp" alt="One Beat at a Time" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">ONE BEAT AT A TIME</p><span class="portfolio-tag">Pixel Scene</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_2.webp"
-          alt="Pixel Characters" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_2.webp" alt="Pixel Characters" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">PIXEL CHARACTERS</p><span class="portfolio-tag">Character Sheet</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_3.webp"
-          alt="Moonlit Forest" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_3.webp" alt="Moonlit Forest" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">MOONLIT FOREST</p><span class="portfolio-tag">Pixel Scene</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_4.webp"
-          alt="Pixel Girl" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_4.webp" alt="Pixel Girl" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">PIXEL GIRL</p><span class="portfolio-tag">Character Sprite</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_5.webp"
-          alt="Pixel Weapon" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_5.webp" alt="Pixel Weapon" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">PIXEL WEAPON</p><span class="portfolio-tag">Item Art</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_6.webp"
-          alt="Pixel Raccoon" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_6.webp" alt="Pixel Raccoon" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">PIXEL RACCOON</p><span class="portfolio-tag">Character Sprite</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_7.webp"
-          alt="Pixel Knight" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_7.webp" alt="Pixel Knight" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">PIXEL KNIGHT</p><span class="portfolio-tag">Character Sprite</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_8.webp"
-          alt="Pixel Fire Girl" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_8.webp" alt="Pixel Fire Girl" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">FIRE GIRL</p><span class="portfolio-tag">Character Art</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_9.webp"
-          alt="Pixel Portrait" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_9.webp" alt="Pixel Portrait" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">PIXEL PORTRAIT</p><span class="portfolio-tag">Portrait Art</span>
         </div>
       </div>
-      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)"><img src="images/pixel_10.webp"
-          alt="Pixel Wizard" loading="lazy" decoding="async">
+      <div class="portfolio-item" data-cat="pixel" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/pixel_10.webp" alt="Pixel Wizard" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Pixel Art</p>
           <p class="portfolio-name">PIXEL WIZARD</p><span class="portfolio-tag">Character Sprite</span>
@@ -2974,29 +3147,33 @@
       </div>
 
       <!-- SCREENS -->
-      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)"><img src="images/screen_1.jpeg"
-          alt="Quercus Rex Starting Soon" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/screen_1.jpeg" alt="Quercus Rex Starting Soon" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Screen</p>
           <p class="portfolio-name">QUERCUS REX - STARTING SOON</p><span class="portfolio-tag">Nature Theme</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)"><img src="images/screen_2.png"
-          alt="CozyTeaPastor Ending Soon" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/screen_2.png" alt="CozyTeaPastor Ending Soon" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Screen</p>
           <p class="portfolio-name">COZYTEAPASTOR - ENDING SOON</p><span class="portfolio-tag">Cozy Theme</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)"><img src="images/screen_3.png"
-          alt="BlindSided Gaming BRB" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/screen_3.png" alt="BlindSided Gaming BRB" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Screen</p>
           <p class="portfolio-name">BLINDSIDED GAMING - BRB</p><span class="portfolio-tag">Green Lightning</span>
         </div>
       </div>
-      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)"><img src="images/screen_4.jpeg"
-          alt="Amishman Ending" loading="lazy" decoding="async">
+      <div class="portfolio-item wide" data-cat="screens" onclick="openLightbox(this)">
+        <div class="img-protect-overlay"></div>
+        <img src="images/screen_4.jpeg" alt="Amishman Ending" loading="lazy" decoding="async">
         <div class="portfolio-overlay">
           <p class="portfolio-category">Stream Screen</p>
           <p class="portfolio-name">AMISHMAN - ENDING</p><span class="portfolio-tag">Ice Blue</span>
@@ -3539,6 +3716,47 @@
 
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script>
+    // =====================================================
+    // IMAGE PROTECTION — disable right-click, drag, save
+    // =====================================================
+    const protectToast = document.getElementById('protectToast');
+    let toastTimer = null;
+
+    function showProtectToast() {
+      protectToast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => protectToast.classList.remove('show'), 2800);
+    }
+
+    // Block right-click on the entire page
+    document.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+      showProtectToast();
+    });
+
+    // Block drag on all images
+    document.addEventListener('dragstart', function (e) {
+      if (e.target.tagName === 'IMG') {
+        e.preventDefault();
+        showProtectToast();
+      }
+    });
+
+    // Block keyboard save shortcuts (Ctrl+S, Ctrl+U, F12 for view-source awareness)
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        showProtectToast();
+      }
+      // Block Ctrl+Shift+I (DevTools) and Ctrl+U (View Source) as deterrent
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+        e.preventDefault();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U')) {
+        e.preventDefault();
+      }
+    });
+
     // ── Mouse glow (desktop only) ──
     const mouseGlow = document.getElementById('mouseGlow');
     if (window.innerWidth >= 900) {
@@ -3550,10 +3768,8 @@
 
     // ── Mobile: remove heavy background decoration elements from DOM ──
     if (window.innerWidth < 768) {
-      // Only remove the art-bg container (ink blobs, geo shapes, scan lines, float icons)
       const artBg = document.querySelector('.art-bg');
       if (artBg) artBg.remove();
-      // Remove art dots
       const artDots = document.querySelector('.art-dots');
       if (artDots) artDots.remove();
     }
@@ -3624,21 +3840,32 @@
     }, { threshold: 0.1 });
     reveals.forEach(r => revealIo.observe(r));
 
-    // =========================================================
-    // VIDEO STRATEGY
-    // DESKTOP: autoplay looping previews in grid
-    // MOBILE:  show thumbnail extracted from video via canvas,
-    //          play full video in lightbox on tap
-    // =========================================================
+    // =====================================================
+    // PORTFOLIO GRID VIEW MODE LOGIC
+    // Categories that need FULL image display (no cropping)
+    // =====================================================
+    // full-view: wide landscape images displayed in single column (banners, overlays, screens)
+    // panel-view: portrait/square images in multi-column grid (panels, alerts, emotes, pixel)
+    // default: square crop grid (anime, cover, logos)
+    const FULL_VIEW_CATS = new Set(['banners', 'overlays', 'screens', 'intros', 'vtubers']);
+    const PANEL_VIEW_CATS = new Set(['panels', 'alerts', 'emotes', 'pixel']);
 
+    function setGridMode(cat) {
+      const grid = document.getElementById('portfolioGrid');
+      grid.classList.remove('full-view', 'panel-view');
+      if (FULL_VIEW_CATS.has(cat)) {
+        grid.classList.add('full-view');
+      } else if (PANEL_VIEW_CATS.has(cat)) {
+        grid.classList.add('panel-view');
+      }
+    }
+
+    // =====================================================
+    // VIDEO STRATEGY
+    // =====================================================
     const IS_MOBILE = window.innerWidth < 900;
     const loadedCats = new Set();
 
-    // ── MOBILE POSTER THUMBNAILS ──
-    // Uses the video's poster="" attribute — set that on each <video> tag.
-    // To generate poster images from your mp4 files, run on your server:
-    //   ffmpeg -i images/vtuber_5.mp4 -ss 00:00:01 -vframes 1 -q:v 2 images/vtuber_5_thumb.jpg
-    // (repeat for every video file)
     function applyMobilePosterThumbnails() {
       if (!IS_MOBILE) return;
       document.querySelectorAll('.portfolio-item video[data-src]').forEach(video => {
@@ -3646,7 +3873,6 @@
         const item = video.closest('.portfolio-item');
         const placeholder = item.querySelector('.vid-placeholder');
         if (!placeholder || !poster) return;
-        // Set poster as background image of placeholder
         placeholder.style.backgroundImage = `url('${poster}')`;
         placeholder.style.backgroundSize = 'cover';
         placeholder.style.backgroundPosition = 'center top';
@@ -3654,7 +3880,6 @@
       });
     }
 
-    // Run immediately — poster paths are already in the HTML, no loading needed
     if (IS_MOBILE) {
       applyMobilePosterThumbnails();
     }
@@ -3686,6 +3911,8 @@
           item.style.display = 'none';
         }
       });
+      // Set default grid mode for anime
+      setGridMode('anime');
     })();
 
     // ── Portfolio filter ──
@@ -3703,6 +3930,9 @@
           item.style.display = 'none';
         }
       });
+
+      // Apply correct grid mode for this category
+      setGridMode(cat);
 
       const visibleItems = document.querySelectorAll(`.portfolio-item[data-cat="${cat}"]`);
       visibleItems.forEach((item, i) => {
@@ -3740,6 +3970,9 @@
     lbLoader.style.cssText = 'position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:10002;pointer-events:none;';
     lbLoader.innerHTML = '<div style="width:48px;height:48px;border:3px solid rgba(255,255,255,0.08);border-top-color:#e63030;border-radius:50%;animation:lbspin 0.75s linear infinite;"></div><p style="font-family:Orbitron,monospace;font-size:0.58rem;letter-spacing:3px;color:rgba(255,255,255,0.35);margin-top:14px;text-transform:uppercase;">Loading</p>';
     lightboxEl.appendChild(lbLoader);
+
+    // Block right-click in lightbox too
+    lightboxEl.addEventListener('contextmenu', e => e.preventDefault());
 
     function openLightbox(el) {
       const video = el.querySelector('video[data-src]');
